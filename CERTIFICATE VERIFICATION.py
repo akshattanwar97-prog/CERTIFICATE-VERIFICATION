@@ -82,3 +82,58 @@ class Blockchain:
                         'block_hash': self.hash(block)
                     })
         return results
+        def main():
+    st.title("Blockchain-based Student Certificate Verification")
+
+    blockchain = Blockchain()
+
+    menu = ["Add Certificate", "Mine Block", "Verify Certificate", "Show Blockchain"]
+    choice = st.sidebar.selectbox("Menu", menu)
+
+    if choice == "Add Certificate":
+        st.subheader("Add a New Student Certificate")
+        student_name = st.text_input("Student Name")
+        course = st.text_input("Course")
+
+        if st.button("Add Certificate"):
+            if student_name and course:
+                index = blockchain.new_certificate(student_name, course)
+                st.success(f"Certificate will be added to Block {index}")
+            else:
+                st.error("Please provide both student name and course.")
+
+    elif choice == "Mine Block":
+        st.subheader("Mine a New Block to Add Certificates")
+        last_proof = blockchain.last_block['proof']
+        proof = blockchain.proof_of_work(last_proof)
+        previous_hash = blockchain.hash(blockchain.last_block)
+        block = blockchain.new_block(proof, previous_hash)
+
+        st.success(f"New Block #{block['index']} mined successfully!")
+        st.write("Block details:", block)
+
+    elif choice == "Verify Certificate":
+        st.subheader("Verify a Student Certificate by Name")
+        search_name = st.text_input("Enter Student Name to Verify")
+
+        if st.button("Verify"):
+            if search_name:
+                results = blockchain.verify_certificate(search_name)
+                if results:
+                    st.success(f"{len(results)} certificate(s) found:")
+                    for cert in results:
+                        st.write(f"Block #{cert['block_index']} | Student: {cert['student_name']} | Course: {cert['course']} | Block Hash: {cert['block_hash']}")
+                else:
+                    st.warning("No certificate found for given student name.")
+            else:
+                st.error("Please enter a student name.")
+
+    elif choice == "Show Blockchain":
+        st.subheader("Entire Blockchain")
+        for block in blockchain.chain:
+            st.write(f"Block #{block['index']}")
+            st.json(block)
+
+if __name__ == '__main__':
+    main()
+
